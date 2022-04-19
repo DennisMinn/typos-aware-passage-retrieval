@@ -16,7 +16,7 @@ class TriplesDataset(BaseDataset):
         
         # TODO: apply textattack transformations
     def __len__(self):
-        return df.shape[0]
+        return self.df.shape[0]
     
     def __getitem__(self, index):
         query = self.queries[index]
