@@ -6,3 +6,6 @@ class CrossEncoder(BaseModel):
 
     def forward():
         pass
+
+    def format():
+        pass

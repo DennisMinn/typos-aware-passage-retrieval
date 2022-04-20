@@ -1,5 +1,5 @@
 import torch
-
+import numpy as np
 from transformers import AutoTokenizer
 from base.base_dataset import BaseDataset
 
@@ -22,24 +22,27 @@ class TriplesDataset(BaseDataset):
         query = self.queries[index]
         pos = self.pos_passages[index]
         neg = self.neg_passages[index]
+
+        return (query, pos, neg)        
+
+    def collate_fn(self, batch):
+        inputs_query = self.tokenizer([sample[0] for sample in batch],
+                                      truncation = True,
+                                      add_special_tokens = True,
+                                      max_length = self.query_maxlen,
+                                      padding = 'longest')
         
-        inputs_query = self.tokenizer.encode_plus(query,
-                                                  truncation = True,
-                                                  add_special_tokens = True,
-                                                  max_length = self.query_maxlen,
-                                                  padding = 'max_length')
+        inputs_pos = self.tokenizer([sample[1] for sample in batch],
+                                    truncation = True,
+                                    add_special_tokens = True,
+                                    max_length = self.passage_maxlen,
+                                    padding = 'longest')
         
-        inputs_pos = self.tokenizer.encode_plus(pos,
-                                                truncation = True,
-                                                add_special_tokens = True,
-                                                max_length = self.passage_maxlen,
-                                                padding = 'max_length')
-        
-        inputs_neg = self.tokenizer.encode_plus(neg,
-                                                truncation = True,
-                                                add_special_tokens = True,
-                                                max_length = self.passage_maxlen,
-                                                padding = 'max_length')
+        inputs_neg = self.tokenizer([sample[2] for sample in batch],
+                                    truncation = True,
+                                    add_special_tokens = True,
+                                    max_length = self.passage_maxlen,
+                                    padding = 'longest')
         
         query_ids, query_mask = inputs_query['input_ids'], inputs_query['attention_mask']
         pos_ids, pos_mask = inputs_pos['input_ids'], inputs_pos['attention_mask']
