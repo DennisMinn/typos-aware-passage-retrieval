@@ -25,22 +25,22 @@ class TriplesDataset(BaseDataset):
 
         return (query, pos, neg)        
 
-    def collate_fn(self, batch):
+    def tokenize_batch(self, batch):
         inputs_query = self.tokenizer([sample[0] for sample in batch],
                                       truncation = True,
-                                      add_special_tokens = True,
+                                      add_special_tokens = False,
                                       max_length = self.query_maxlen,
-                                      padding = 'longest')
+                                      padding = 'max_length')
         
         inputs_pos = self.tokenizer([sample[1] for sample in batch],
                                     truncation = True,
-                                    add_special_tokens = True,
+                                    add_special_tokens = False,
                                     max_length = self.passage_maxlen,
                                     padding = 'longest')
         
         inputs_neg = self.tokenizer([sample[2] for sample in batch],
                                     truncation = True,
-                                    add_special_tokens = True,
+                                    add_special_tokens = False,
                                     max_length = self.passage_maxlen,
                                     padding = 'longest')
         
@@ -54,7 +54,9 @@ class TriplesDataset(BaseDataset):
             'pos_ids': torch.tensor(pos_ids, dtype = torch.long),
             'pos_mask': torch.tensor(pos_mask, dtype = torch.long),
             'neg_ids': torch.tensor(neg_ids, dtype = torch.long),
-            'neg_mask': torch.tensor(neg_mask, dtype = torch.long)
+            'neg_mask': torch.tensor(neg_mask, dtype = torch.long),
+            'cls_id': self.tokenizer.encode(self.tokenizer.cls_token, add_special_tokens = False)[0],
+            'sep_id': self.tokenizer.encode(self.tokenizer.sep_token, add_special_tokens = False)[0],
         }
 
 
