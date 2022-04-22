@@ -22,8 +22,9 @@ class TriplesDataset(BaseDataset):
         query = self.queries[index]
         pos = self.pos_passages[index]
         neg = self.neg_passages[index]
+        label = 0
 
-        return (query, pos, neg)        
+        return (query, pos, neg, label)        
 
     def tokenize_batch(self, batch):
         inputs_query = self.tokenizer([sample[0] for sample in batch],
@@ -47,7 +48,8 @@ class TriplesDataset(BaseDataset):
         query_ids, query_mask = inputs_query['input_ids'], inputs_query['attention_mask']
         pos_ids, pos_mask = inputs_pos['input_ids'], inputs_pos['attention_mask']
         neg_ids, neg_mask = inputs_neg['input_ids'], inputs_neg['attention_mask']
-        
+        labels = [[sample[3] for sample in batch]]
+
         return {
             'query_ids': torch.tensor(query_ids, dtype = torch.long),
             'query_mask': torch.tensor(query_mask, dtype = torch.long),
@@ -55,6 +57,7 @@ class TriplesDataset(BaseDataset):
             'pos_mask': torch.tensor(pos_mask, dtype = torch.long),
             'neg_ids': torch.tensor(neg_ids, dtype = torch.long),
             'neg_mask': torch.tensor(neg_mask, dtype = torch.long),
+            'labels': torch.tensor(labels, dtype = torch.long),
             'cls_id': self.tokenizer.encode(self.tokenizer.cls_token, add_special_tokens = False)[0],
             'sep_id': self.tokenizer.encode(self.tokenizer.sep_token, add_special_tokens = False)[0],
         }

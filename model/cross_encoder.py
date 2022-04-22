@@ -8,7 +8,7 @@ class CrossEncoder(BaseModel):
     def __init__(self, model_name):
         super().__init__()
         self.encoder = AutoModel.from_pretrained(model_name)
-        self.fc = nn.Linear(768, 2)
+        self.fc = nn.Linear(768, 1)
 
     def forward(self, input_ids, attention_mask):
         out = self.encoder(input_ids = input_ids,
@@ -22,6 +22,7 @@ class CrossEncoder(BaseModel):
         query_ids, query_mask = batch['query_ids'], batch['query_mask']
         pos_ids, pos_mask = batch['pos_ids'], batch['pos_mask']
         neg_ids, neg_mask = batch['neg_ids'], batch['neg_mask']
+        labels = batch['labels']
         cls_id, sep_id = batch['cls_id'], batch['sep_id']
 
         query_pos_ids, query_pos_mask = CrossEncoder._format(cls_id,
@@ -42,6 +43,7 @@ class CrossEncoder(BaseModel):
             'query_pos_mask': torch.tensor(query_pos_mask, dtype = torch.long),
             'query_neg_ids': torch.tensor(query_neg_ids, dtype = torch.long),
             'query_neg_mask': torch.tensor(query_neg_mask, dtype = torch.long),
+            'labels': torch.tensor(labels, dtype = torch.long),
         }        
 
     @staticmethod
