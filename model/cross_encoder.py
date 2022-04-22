@@ -1,12 +1,21 @@
+from transformers import AutoModel
 from base.base_model import BaseModel
+
 import torch
+import torch.nn as nn
 
 class CrossEncoder(BaseModel):
     def __init__(self, model_name):
-        pass
+        super().__init__()
+        self.encoder = AutoModel.from_pretrained(model_name)
+        self.fc = nn.Linear(768, 2)
 
-    def forward():
-        pass
+    def forward(self, input_ids, attention_mask):
+        out = self.encoder(input_ids = input_ids,
+                           attention_mask = attention_mask).last_hidden_state[:, 0, :]
+
+        output = self.fc(out)
+        return output
     
     @staticmethod
     def format(batch):
@@ -29,10 +38,10 @@ class CrossEncoder(BaseModel):
                                                 neg_ids,
                                                 neg_mask,)
         return {
-            'query_pos_ids': query_pos_ids,
-            'query_pos_mask': query_pos_mask,
-            'query_neg_ids': query_neg_ids,
-            'query_neg_mask': query_neg_mask,
+            'query_pos_ids': torch.tensor(query_pos_ids, dtype = torch.long),
+            'query_pos_mask': torch.tensor(query_pos_mask, dtype = torch.long),
+            'query_neg_ids': torch.tensor(query_neg_ids, dtype = torch.long),
+            'query_neg_mask': torch.tensor(query_neg_mask, dtype = torch.long),
         }        
 
     @staticmethod
