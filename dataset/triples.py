@@ -10,6 +10,9 @@ class TriplesDataset(BaseDataset):
         self.query_maxlen = query_maxlen
         self.passage_maxlen = passage_maxlen
         
+        self.cls_id = tokenizer.cls_token_id
+        self.sep_id = tokenizer.sep_token_id
+
         self.queries = dataframe['query'].values
         self.pos_passages = dataframe['positive_passage'].values
         self.neg_passages = dataframe['negative_passage'].values
@@ -41,17 +44,23 @@ class TriplesDataset(BaseDataset):
                                                 max_length = self.passage_maxlen,
                                                 padding = 'max_length')
         
+        cls_id = self.cls_id
+        sep_id = self.sep_id
         query_ids, query_mask = inputs_query['input_ids'], inputs_query['attention_mask']
         pos_ids, pos_mask = inputs_pos['input_ids'], inputs_pos['attention_mask']
         neg_ids, neg_mask = inputs_neg['input_ids'], inputs_neg['attention_mask']
-        
+        label = 1
+
         return {
-            'query_ids': torch.tensor(query_ids, dtype = torch.long),
-            'query_mask': torch.tensor(query_mask, dtype = torch.long),
-            'pos_ids': torch.tensor(pos_ids, dtype = torch.long),
-            'pos_mask': torch.tensor(pos_mask, dtype = torch.long),
-            'neg_ids': torch.tensor(neg_ids, dtype = torch.long),
-            'neg_mask': torch.tensor(neg_mask, dtype = torch.long)
+            'cls_id': torch.tensor(cls_id, dtype=torch.long),
+            'sep_id': torch.tensor(sep_id, dtype=torch.long),
+            'query_ids': torch.tensor(query_ids, dtype=torch.long),
+            'query_mask': torch.tensor(query_mask, dtype=torch.long),
+            'pos_ids': torch.tensor(pos_ids, dtype=torch.long),
+            'pos_mask': torch.tensor(pos_mask, dtype=torch.long),
+            'neg_ids': torch.tensor(neg_ids, dtype=torch.long),
+            'neg_mask': torch.tensor(neg_mask, dtype=torch.long),
+            'label': torch.tensor(label, dtype=torch.long),
         }
 
 
