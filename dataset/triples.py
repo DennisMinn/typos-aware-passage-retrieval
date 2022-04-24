@@ -28,19 +28,19 @@ class TriplesDataset(BaseDataset):
         
         inputs_query = self.tokenizer.encode_plus(query,
                                                   truncation = True,
-                                                  add_special_tokens = True,
+                                                  add_special_tokens = False,
                                                   max_length = self.query_maxlen,
                                                   padding = 'max_length')
         
         inputs_pos = self.tokenizer.encode_plus(pos,
                                                 truncation = True,
-                                                add_special_tokens = True,
+                                                add_special_tokens = False,
                                                 max_length = self.passage_maxlen,
                                                 padding = 'max_length')
         
         inputs_neg = self.tokenizer.encode_plus(neg,
                                                 truncation = True,
-                                                add_special_tokens = True,
+                                                add_special_tokens = False,
                                                 max_length = self.passage_maxlen,
                                                 padding = 'max_length')
         
@@ -49,7 +49,7 @@ class TriplesDataset(BaseDataset):
         query_ids, query_mask = inputs_query['input_ids'], inputs_query['attention_mask']
         pos_ids, pos_mask = inputs_pos['input_ids'], inputs_pos['attention_mask']
         neg_ids, neg_mask = inputs_neg['input_ids'], inputs_neg['attention_mask']
-        label = 1
+        label = [1]
 
         return {
             'cls_id': torch.tensor(cls_id, dtype=torch.long),
@@ -60,7 +60,7 @@ class TriplesDataset(BaseDataset):
             'pos_mask': torch.tensor(pos_mask, dtype=torch.long),
             'neg_ids': torch.tensor(neg_ids, dtype=torch.long),
             'neg_mask': torch.tensor(neg_mask, dtype=torch.long),
-            'label': torch.tensor(label, dtype=torch.long),
+            'target': torch.tensor(label, dtype=torch.long),
         }
 
 
