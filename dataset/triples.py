@@ -22,7 +22,7 @@ class TriplesDataset(BaseDataset):
         query = self.queries[index]
         pos = self.pos_passages[index]
         neg = self.neg_passages[index]
-        label = 0
+        label = 1
 
         return (query, pos, neg, label)        
 

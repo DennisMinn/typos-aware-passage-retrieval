@@ -6,24 +6,35 @@ class BaseTrainer:
     '''
     Base class for all training
     '''
-    def __init__(self, model, criterion, metrics, optimizer, scheduler, config):
+    def __init__(self, config, model, criterion, optimizer, metric, scheduler = None):
         '''
         TODO: implement initialization
         '''
-        pass
+        self.config = config
+        self.model = model
+        self.criterion = criterion
+        self.optimizer = optimizer
+        self.metrics = metrics
+        self.scheduler = scheduler
 
     @abstractmethod
-    def _train(self, step):
+    def _train(self, batch):
         '''
         Training logic for one batch
         '''
         raise NotImplementedError
 
-    def train(self):
+    def train(self, data_loader):
         '''
         TODO: implement training logic
         '''
-        pass
+        total_loss = 0.0
+        for epoch in range(config['n_epochs']):
+            for batch in data_loader:
+                loss = self._train(batch)
+                total_loss += loss
+
+        return total_loss
 
     def _save_checkpoint(self, epoch, save_best = False):
         '''

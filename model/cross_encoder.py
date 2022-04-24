@@ -1,6 +1,5 @@
 from transformers import AutoModel
 from base.base_model import BaseModel
-
 import torch
 import torch.nn as nn
 
@@ -18,6 +17,7 @@ class CrossEncoder(BaseModel):
         return output
     
     @staticmethod
+    #TODO move format to trainer
     def format(batch):
         query_ids, query_mask = batch['query_ids'], batch['query_mask']
         pos_ids, pos_mask = batch['pos_ids'], batch['pos_mask']
