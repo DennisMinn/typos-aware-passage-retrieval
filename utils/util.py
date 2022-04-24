@@ -22,3 +22,14 @@ def read_input(chunks = None, chunk_size = 5000, **params):
             if(i == chunks):
                 break
     return df
+
+def read_triples(path, chunks=None, chunk_size=5000):
+    params = {
+	'filepath_or_buffer': path, 
+	'sep':'\t',
+	'header': None,
+	'names': ['query', 'positive_passage', 'negative_passage'],
+	'compression': 'infer',
+    }
+    
+    return read_input(chunks, chunk_size, **params)
