@@ -6,16 +6,14 @@ from torchmetrics.functional import accuracy
 from base.base_model import BaseModel
 
 class CrossEncoder(BaseModel):
-    def __init__(self, config):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        self.config = config
-        self.model_config = AutoConfig.from_pretrained(config['model_name'])
+        self.save_hyperparameters()
+
+        self.model_config = AutoConfig.from_pretrained(hparams['model_name'])
         self.encoder = AutoModel.from_config(self.model_config)
         self.fc = nn.Linear(self.model_config.hidden_size, 1)
-
         
-        # log hyperparameters
-        self.save_hyperparameters('config')
 
     def forward(self, input_ids, attention_mask):
         out = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
@@ -30,11 +28,11 @@ class CrossEncoder(BaseModel):
         neg_ids, neg_mask = batch['neg_ids'], batch['neg_mask']
         targets = batch['target']
 
-        pos_input = CrossEncoder.triples_format(cls_id, sep_id,
+        pos_input = CrossEncoder.format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          pos_ids, pos_mask)
 
-        neg_input = CrossEncoder.triples_format(cls_id, sep_id,
+        neg_input = CrossEncoder.format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          neg_ids, neg_mask)
 
@@ -57,7 +55,35 @@ class CrossEncoder(BaseModel):
         return {'loss': loss}
 
     def validation_step(self, batch, batch_idx):
-        pass
+        cls_id, sep_id = batch['cls_id'], batch['sep_id']
+        query_ids, query_mask = batch['query_ids'], batch['query_mask']
+        pos_ids, pos_mask = batch['pos_ids'], batch['pos_mask']
+        neg_ids, neg_mask = batch['neg_ids'], batch['neg_mask']
+        targets = batch['target']
+
+        pos_input = CrossEncoder.format(cls_id, sep_id,
+                                         query_ids, query_mask,
+                                         pos_ids, pos_mask)
+
+        neg_input = CrossEncoder.format(cls_id, sep_id,
+                                         query_ids, query_mask,
+                                         neg_ids, neg_mask)
+
+        pos_score = self.forward(pos_input['input_ids'],
+                                 pos_input['attention_mask'])
+
+        neg_score = self.forward(neg_input['input_ids'],
+                                 pos_input['attention_mask'])
+
+        preds = torch.tensor(pos_score > neg_score, dtype=torch.long)
+
+        # calculate metrics
+        acc = accuracy(preds, targets)
+
+        # logging metrics
+        self.log('val/acc', acc)
+
+        return {'loss': loss}
 
     @staticmethod
     def format(cls_id, sep_id, query_ids, query_mask, passage_ids, passage_mask):
