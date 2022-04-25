@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoConfig, AutoModel
-
+from torchmetrics.functional import accuracy
 from base.base_model import BaseModel
 
 class CrossEncoder(BaseModel):
@@ -12,6 +12,10 @@ class CrossEncoder(BaseModel):
         self.model_config = AutoConfig.from_pretrained(config['model_name'])
         self.encoder = AutoModel.from_config(self.model_config)
         self.fc = nn.Linear(self.model_config.hidden_size, 1)
+
+        
+        # log hyperparameters
+        self.save_hyperparameters('config')
 
     def forward(self, input_ids, attention_mask):
         out = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
@@ -40,8 +44,16 @@ class CrossEncoder(BaseModel):
         neg_score = self.forward(neg_input['input_ids'],
                                  pos_input['attention_mask'])
 
+        preds = torch.tensor(pos_score > neg_score, dtype=torch.long)
+
+        # calculate metrics
         loss = F.margin_ranking_loss(pos_score, neg_score, targets)
-        
+        acc = accuracy(preds, targets)
+
+        # logging metrics
+        self.log('train/loss', loss, prog_bar=True)
+        self.log('train/acc', acc)
+
         return {'loss': loss}
 
     def validation_step(self, batch, batch_idx):
