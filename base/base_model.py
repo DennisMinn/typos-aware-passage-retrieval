@@ -33,9 +33,14 @@ class BaseModel(pl.LightningModule):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def test_step(self, batch, batch_idx):
+        """
+        Test logic for one batch in test set (top1000.tsv)
+        """
+        raise NotImplementedError
 
     #TODO implement lr scheduler
-    #TODO add tensorboard log
     def configure_optimizers(self):
         """
         initializes optimizers
