@@ -1,49 +1,20 @@
 import csv
-import tqdm as tqdm
 
-from collections import defaultdict
+def read_triples(triples_path):
+    triples = []
+    with open(triples_path, 'r', encoding='latin-1') as infile:
+        for query, pos_passage, neg_passage in reader:
+            triples.append({'query': query,
+                            'pos_passage': pos_passage,
+                            'neg_passage': neg_passage})
+    return triples
 
-def read_input(chunks = None, chunk_size = 5000, **params):
-    #TODO 
-    # chunks * chunk_size < total_rows
-    # fix tqdm
-    # add logs
-
-    df = pd.DataFrame()
-    file_path = params['filepath_or_buffer']
-    
-    print('Counting lines')
-    n_rows = chunks * chunk_size if chunks is not None else sum(1 for row in open(file_path, 'rb'))
-    params['chunksize'] = chunk_size
-    params['low_memory'] = False
-    
-    print('Parsing lines')
-    with tqdm.tqdm(total = n_rows, desc = 'Reading Chunks: ') as progress_bar:
-        for i, chunk in enumerate(pd.read_csv(**params)):
-            df = pd.concat([df, chunk])
-            progress_bar.update(chunk_size)
-            
-            if(i == chunks):
-                break
-    return df
-
-def read_triples(path, chunks=None, chunk_size=5000):
-    params = {
-	'filepath_or_buffer': path, 
-	'sep':'\t',
-	'header': None,
-	'names': ['query', 'positive_passage', 'negative_passage'],
-	'compression': 'infer',
-    }
-    
-    return read_input(**params)
-
-def read_qidpidtriples(path):
+def read_qidpidtriples(qidpidtriples_path):
     triples = []
     with open(qidpidtriples_path, 'r', encoding='latin-1') as infile:
         for qid, pos_pid, neg_pid in reader:
             triples.append({'qid':qid,
-                            'pos_pid':pos_id,
+                            'pos_pid':pos_pid,
                             'neg_pid':neg_pid})
     return triples
 
