@@ -4,8 +4,14 @@ from transformers import AutoTokenizer
 from base.base_dataset import BaseDataset
 
 class TriplesDataset(BaseDataset):
-    def __init__(self, dataframe, tokenizer, query_maxlen, passage_maxlen, transformations = None):
-        self.df = dataframe
+    def __init__(self, collection, queries, qidpidtriples,
+                 tokenizer, query_maxlen, passage_maxlen,
+                 transformations = None):
+
+        self.collection = collection
+        self.queries = queries
+        self.qidpidtriples = qidpidtriples
+
         self.tokenizer = tokenizer
         self.query_maxlen = query_maxlen
         self.passage_maxlen = passage_maxlen
@@ -13,18 +19,15 @@ class TriplesDataset(BaseDataset):
         self.cls_id = tokenizer.cls_token_id
         self.sep_id = tokenizer.sep_token_id
 
-        self.queries = dataframe['query'].values
-        self.pos_passages = dataframe['positive_passage'].values
-        self.neg_passages = dataframe['negative_passage'].values
-        
         # TODO: apply textattack transformations
     def __len__(self):
         return self.df.shape[0]
     
     def __getitem__(self, index):
-        query = self.queries[index]
-        pos = self.pos_passages[index]
-        neg = self.neg_passages[index]
+        qid, pos_pid, neg_pid = qidpidtriples.items()
+        query = self.queries[qid]
+        pos = self.passages[pos_pid]
+        neg = self.passages[neg_pid]
         
         inputs_query = self.tokenizer.encode_plus(query,
                                                   truncation = True,
