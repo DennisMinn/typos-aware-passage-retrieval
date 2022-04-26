@@ -33,11 +33,14 @@ if __name__ == "__main__":
     }
 
     print('Reading file')
-    triples = read_triples('data/triples.train.small.tsv')
+    pidqidtriples = read_qidpidtriples('data/triples.train.small.tsv')
+    collection = read_collection('data/collection.tsv')
+    queries = read_queries('data/queries.tsv')
 
     print('Setting up')
     tokenizer = AutoTokenizer.from_pretrained(CONFIG['model_name'])
-    triples_dataset = TriplesDataset(triples, tokenizer, CONFIG['query_maxlen'], CONFIG['passage_maxlen'])
+    triples_dataset = TriplesDataset(collection, queries, pidqidtriples, 
+                                     tokenizer, CONFIG['query_maxlen'], CONFIG['passage_maxlen'])
     triples_dataloader = DataLoader(triples_dataset, batch_size=CONFIG['batch_size'])
 
     print('Training')
