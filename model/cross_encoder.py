@@ -10,7 +10,7 @@ class CrossEncoder(BaseModel):
         super().__init__()
         self.save_hyperparameters()
 
-        self.model_config = AutoConfig.from_pretrained(hparams['model_name'])
+        self.model_config = AutoConfig.from_pretrained(self.hparams['model_name'])
         self.encoder = AutoModel.from_config(self.model_config)
         self.fc = nn.Linear(self.model_config.hidden_size, 1)
         
@@ -28,11 +28,11 @@ class CrossEncoder(BaseModel):
         neg_ids, neg_mask = batch['neg_ids'], batch['neg_mask']
         targets = batch['target']
 
-        pos_input = CrossEncoder.format(cls_id, sep_id,
+        pos_input = self._format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          pos_ids, pos_mask)
 
-        neg_input = CrossEncoder.format(cls_id, sep_id,
+        neg_input = self._format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          neg_ids, neg_mask)
 
@@ -61,11 +61,11 @@ class CrossEncoder(BaseModel):
         neg_ids, neg_mask = batch['neg_ids'], batch['neg_mask']
         targets = batch['target']
 
-        pos_input = CrossEncoder.format(cls_id, sep_id,
+        pos_input = self._format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          pos_ids, pos_mask)
 
-        neg_input = CrossEncoder.format(cls_id, sep_id,
+        neg_input = self._format(cls_id, sep_id,
                                          query_ids, query_mask,
                                          neg_ids, neg_mask)
 
@@ -85,12 +85,11 @@ class CrossEncoder(BaseModel):
 
         return {'loss': loss}
 
-    @staticmethod
-    def format(cls_id, sep_id, query_ids, query_mask, passage_ids, passage_mask):
+    def _format(self, cls_id, sep_id, query_ids, query_mask, passage_ids, passage_mask):
         # did Reranker pad query then added sep token query+0s+sep+pass or query+sep+0s+pass
         n, q, p = query_ids.shape[0], query_ids.shape[1], passage_ids.shape[1]
-        input_ids = torch.zeros(n, 1+q+1+p, dtype=torch.long) 
-        attention_mask = torch.zeros(n, 1+q+1+p, dtype=torch.long)
+        input_ids = torch.zeros(n, 1+q+1+p, dtype=torch.long, device=self.device) 
+        attention_mask = torch.zeros(n, 1+q+1+p, dtype=torch.long, device=self.device)
 
         input_ids[:, 0] += cls_id
         input_ids[:, 1:q+1] += query_ids
