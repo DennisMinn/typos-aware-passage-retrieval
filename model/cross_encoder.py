@@ -83,7 +83,7 @@ class CrossEncoder(BaseModel):
         # logging metrics
         self.log('val/acc', acc)
 
-        return {'loss': loss}
+        return acc
 
     def _format(self, cls_id, sep_id, query_ids, query_mask, passage_ids, passage_mask):
         # did Reranker pad query then added sep token query+0s+sep+pass or query+sep+0s+pass
