@@ -45,7 +45,7 @@ class BaseModel(pl.LightningModule):
         """
         initializes optimizers
         """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.config['learning_rate'])
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams['learning_rate'])
         return optimizer
 
     #def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
