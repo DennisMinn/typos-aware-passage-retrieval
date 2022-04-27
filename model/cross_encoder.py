@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoConfig, AutoModel
-from torchmetrics.functional import accuracy
 from base.base_model import BaseModel
 
 class CrossEncoder(BaseModel):
@@ -46,11 +45,11 @@ class CrossEncoder(BaseModel):
 
         # calculate metrics
         loss = F.margin_ranking_loss(pos_score, neg_score, targets)
-        acc = accuracy(preds, targets)
+        basic_metrics = self._calculate_metrics(preds, targets)
 
         # logging metrics
         self.log('train/loss', loss, prog_bar=True)
-        self.log('train/acc', acc)
+        self._log_metrics('train', basic_metrics)
 
         return {'loss': loss}
 
@@ -78,12 +77,12 @@ class CrossEncoder(BaseModel):
         preds = torch.tensor(pos_score > neg_score, dtype=torch.long)
 
         # calculate metrics
-        acc = accuracy(preds, targets)
+        basic_metrics = self._calculate_metrics(preds, targets)
 
         # logging metrics
-        self.log('val/acc', acc)
+        self._log_metrics('validation', basic_metrics)
 
-        return acc
+        return basic_metrics
 
     def _format(self, cls_id, sep_id, query_ids, query_mask, passage_ids, passage_mask):
         # did Reranker pad query then added sep token query+0s+sep+pass or query+sep+0s+pass
