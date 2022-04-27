@@ -21,13 +21,12 @@ class TriplesDataset(BaseDataset):
 
         # TODO: apply textattack transformations
     def __len__(self):
-        return self.df.shape[0]
+        return len(self.qidpidtriples)
     
     def __getitem__(self, index):
         query = self.queries[self.qidpidtriples['qid'][index]]
-        pos = self.passages[self.qidpidtriples['pos_pid'][index]]
-        neg = self.passages[self.qidpidtriples['neg_pid'][index]]
-        
+        pos = self.collection[self.qidpidtriples['pos_pid'][index]]
+        neg = self.collection[self.qidpidtriples['neg_pid'][index]]
         inputs_query = self.tokenizer.encode_plus(query,
                                                   truncation = True,
                                                   add_special_tokens = False,
@@ -54,15 +53,15 @@ class TriplesDataset(BaseDataset):
         label = [1]
 
         return {
-            'cls_id': cls_id,
-            'sep_id': sep_id,
-            'query_ids': query_ids,
-            'query_mask': query_mask,
-            'pos_ids': pos_ids,
-            'pos_mask': pos_mask,
-            'neg_ids': neg_ids,
-            'neg_mask': neg_mask,
-            'target': label,
+            'cls_id': torch.tensor(cls_id),
+            'sep_id': torch.tensor(sep_id),
+            'query_ids': torch.tensor(query_ids),
+            'query_mask': torch.tensor(query_mask),
+            'pos_ids': torch.tensor(pos_ids),
+            'pos_mask': torch.tensor(pos_mask),
+            'neg_ids': torch.tensor(neg_ids),
+            'neg_mask': torch.tensor(neg_mask),
+            'target': torch.tensor(label),
         }
 
 
