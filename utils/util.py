@@ -1,22 +1,27 @@
 import csv
 
 def read_triples(triples_path):
-    triples = []
+    queries, pos_passages, neg_passages = [], [], []
+
     with open(triples_path, 'r', encoding='latin-1') as infile:
+        reader = csv.reader(infile, delimiter='\t')
         for query, pos_passage, neg_passage in reader:
-            triples.append({'query': query,
-                            'pos_passage': pos_passage,
-                            'neg_passage': neg_passage})
-    return triples
+            queries.append(query)
+            pos_passages.append(pos_passage)
+            neg_passages.append(neg_passage)
+    
+    return {'query': queries, 'pos_passage': pos_passages, 'neg_passage': neg_passages}
 
 def read_qidpidtriples(qidpidtriples_path):
-    triples = []
+    qids, pos_pids, neg_pids = [], [], []
     with open(qidpidtriples_path, 'r', encoding='latin-1') as infile:
+        reader = csv.reader(infile, delimiter='\t')
         for qid, pos_pid, neg_pid in reader:
-            triples.append({'qid':qid,
-                            'pos_pid':pos_pid,
-                            'neg_pid':neg_pid})
-    return triples
+            qids.append(int(qid))
+            pos_pids.append(int(pos_pid))
+            neg_pids.append(int(neg_pid))
+            
+    return {'qid': qids, 'pos_pid': pos_pids, 'neg_pid': neg_pids}
 
 def read_queries(queries_path):
     queries = dict()
@@ -37,22 +42,23 @@ def read_collection(collection_path):
     return collection
 
 def read_qrels(qrels_path):
-    qrels = []
+    qids, pids = [], []
     with open(qrels_path, 'r', encoding='latin-1') as infile:
         reader = csv.reader(infile, delimiter='\t')
         for qid, _, pid, _ in reader:
-            qrels.append({'qid': qid, 'pid': pid})
+            qids.append(int(qid))
+            pids.append(int(pid))
 
-    return qrels
+    return {'qid': qids, 'pid': pids}
 
 def read_top1000(top1000_path):
-    top1000 = []
+    qids, pids, queries, passages = [], [], [], []
     with open(top1000_path, 'r', encoding='latin-1') as infile:
         reader = csv.reader(infile, delimiter='\t')
         for qid, pid, query, passage in reader:
-            top1000.append({'qid': qid,
-                            'pid': pid,
-                            'passage': passage,
-                            'query': query})
+            qids.append(qid)
+            pids.append(pid)
+            queries.append(query)
+            passages.append(passage)
 
-    return top1000
+    return {'qid': qids, 'pid': pids, 'query': queries, 'passage': passages}
