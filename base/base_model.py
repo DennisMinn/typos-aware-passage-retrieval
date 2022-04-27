@@ -3,7 +3,7 @@ import tqdm
 
 import torch
 import pytorch_lightning as pl
-
+from torchmetrics.functional import accuracy, precision, recall, f1_score
 from abc import abstractmethod
 
 class BaseModel(pl.LightningModule):
@@ -50,3 +50,19 @@ class BaseModel(pl.LightningModule):
 
     #def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
     #    pass
+    
+    def _calculate_metrics(self, preds, targets):
+        acc = accuracy(preds, targets) 
+        prec = precision(preds, targets)
+        recal = recall(preds, targets)
+        f1 = f1_score(preds, targets)
+
+        return {'accuracy': acc,
+                'precision': prec,
+                'recall': recal,
+                'f1_score': f1}
+    
+    def _log_metrics(self, stage, metrics):
+        for metric, value in metrics.items():
+            self.log(f'{stage}/{metric}', value)
+
