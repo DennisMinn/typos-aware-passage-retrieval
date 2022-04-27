@@ -24,10 +24,9 @@ class TriplesDataset(BaseDataset):
         return self.df.shape[0]
     
     def __getitem__(self, index):
-        qid, pos_pid, neg_pid = qidpidtriples.items()
-        query = self.queries[qid]
-        pos = self.passages[pos_pid]
-        neg = self.passages[neg_pid]
+        query = self.queries[self.qidpidtriples['qid'][index]]
+        pos = self.passages[self.qidpidtriples['pos_pid'][index]]
+        neg = self.passages[self.qidpidtriples['neg_pid'][index]]
         
         inputs_query = self.tokenizer.encode_plus(query,
                                                   truncation = True,
@@ -55,15 +54,15 @@ class TriplesDataset(BaseDataset):
         label = [1]
 
         return {
-            'cls_id': torch.tensor(cls_id, dtype=torch.long),
-            'sep_id': torch.tensor(sep_id, dtype=torch.long),
-            'query_ids': torch.tensor(query_ids, dtype=torch.long),
-            'query_mask': torch.tensor(query_mask, dtype=torch.long),
-            'pos_ids': torch.tensor(pos_ids, dtype=torch.long),
-            'pos_mask': torch.tensor(pos_mask, dtype=torch.long),
-            'neg_ids': torch.tensor(neg_ids, dtype=torch.long),
-            'neg_mask': torch.tensor(neg_mask, dtype=torch.long),
-            'target': torch.tensor(label, dtype=torch.long),
+            'cls_id': cls_id,
+            'sep_id': sep_id,
+            'query_ids': query_ids,
+            'query_mask': query_mask,
+            'pos_ids': pos_ids,
+            'pos_mask': pos_mask,
+            'neg_ids': neg_ids,
+            'neg_mask': neg_mask,
+            'target': label,
         }
 
 
